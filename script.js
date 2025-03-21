@@ -12,7 +12,6 @@
     // Menonaktifkan akses ke console
     Object.defineProperty(window, 'console', {
         get: function() {
-            alert('Console diblokir. Anda tidak dapat mengakses console!');
             return {
                 log: function() {},
                 warn: function() {},
