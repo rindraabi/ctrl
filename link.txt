@@ -1,1 +1,4 @@
 https://www.jsdelivr.com/github
+
+
+<script src="https://cdn.jsdelivr.net/gh/rindraabi/ctrl@4aa789b4d85e7293cc5146fdf0a233651e3f613e/script.js"></script>
