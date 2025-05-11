@@ -15,9 +15,8 @@
 
     // Load disable-devtool with all protections enabled
     var disableDevtoolScript = document.createElement('script');
-    disableDevtoolScript.src = 'https://cdn.jsdelivr.net/npm/disable-devtool@latest';
+    disableDevtoolScript.src = 'https://cdn.jsdelivr.net/npm/disable-devtool';
     disableDevtoolScript.setAttribute('disable-devtool-auto', '');
-    disableDevtoolScript.setAttribute('disable-devtool-all', '');
     document.head.appendChild(disableDevtoolScript);
 
     // Disable console completely
