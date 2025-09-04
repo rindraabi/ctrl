@@ -16,31 +16,8 @@
     var devToolsOpened = false;
     var securityTriggered = false;
 
-    // Load disable-devtool with all protections enabled - FIXED
-    var disableDevtoolScript = document.createElement('script');
-    disableDevtoolScript.src = 'https://cdn.jsdelivr.net/npm/disable-devtool@latest/dist/index.min.js';
-    disableDevtoolScript.onload = function() {
-        // Initialize disable-devtool after script is loaded
-        if (typeof DisableDevtool !== 'undefined') {
-            DisableDevtool({
-                md5: Date.now().toString(),
-                url: 'https://www.instagram.com/lambda.net.id/',
-                tkName: 'disable-devtool',
-                ondevtoolopen: function(type) {
-                    if (!securityTriggered) {
-                        securityTriggered = true;
-                        showSecurityWarning();
-                    }
-                },
-                interval: 1000,
-                disableMenu: true
-            });
-        }
-    };
-    document.head.appendChild(disableDevtoolScript);
-
-    // Create security warning (without immediate redirect)
-    function showSecurityWarning() {
+    // Create security overlay
+    function disableInteraction() {
         // Remove any existing overlay first
         var existingOverlay = document.getElementById('security-overlay');
         if (existingOverlay) {
@@ -77,6 +54,7 @@
         document.getElementById('close-warning').addEventListener('click', function() {
             overlay.remove();
             document.body.style.pointerEvents = 'auto';
+            securityTriggered = false;
         });
         
         // Redirect after a delay, but only if this was a real security event
@@ -86,6 +64,29 @@
             }
         }, 5000);
     }
+
+    // Load disable-devtool with all protections enabled - FIXED
+    var disableDevtoolScript = document.createElement('script');
+    disableDevtoolScript.src = 'https://cdn.jsdelivr.net/npm/disable-devtool@latest/dist/index.min.js';
+    disableDevtoolScript.onload = function() {
+        // Initialize disable-devtool after script is loaded
+        if (typeof DisableDevtool !== 'undefined') {
+            DisableDevtool({
+                md5: Date.now().toString(),
+                url: 'https://www.instagram.com/lambda.net.id/',
+                tkName: 'disable-devtool',
+                ondevtoolopen: function(type) {
+                    if (!securityTriggered) {
+                        securityTriggered = true;
+                        disableInteraction(); // Using the existing function
+                    }
+                },
+                interval: 1000,
+                disableMenu: true
+            });
+        }
+    };
+    document.head.appendChild(disableDevtoolScript);
 
     // Anti-HTTCrack and web scraper protection - Less aggressive
     function preventPageCopying() {
@@ -100,7 +101,7 @@
         if (blockedAgents.some(agent => userAgent.includes(agent))) {
             // Only redirect for known scraping tools
             securityTriggered = true;
-            showSecurityWarning();
+            disableInteraction();
             return;
         }
 
@@ -114,7 +115,7 @@
             } catch (e) {
                 // If we can't break out of the frame, it's likely a security issue
                 securityTriggered = true;
-                showSecurityWarning();
+                disableInteraction();
             }
         }
     }
@@ -131,7 +132,7 @@
                 event.preventDefault();
                 if (!securityTriggered) {
                     securityTriggered = true;
-                    showSecurityWarning();
+                    disableInteraction();
                 }
             }
         });
@@ -142,7 +143,7 @@
         e.preventDefault();
         if (!securityTriggered) {
             securityTriggered = true;
-            showSecurityWarning();
+            disableInteraction();
         }
     });
 
@@ -155,7 +156,7 @@
             devToolsOpened = true;
             if (!securityTriggered) {
                 securityTriggered = true;
-                showSecurityWarning();
+                disableInteraction();
             }
         }
     }
