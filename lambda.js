@@ -1,7 +1,7 @@
 (function() {
     // Enhanced security script by Manyu Store
     // Protections against: DevTools, View-Source, F12, HTTrack, web scrapers
-    // Last updated: 09/04/2025 - Enhanced version
+    // Last updated: 09/04/2025 - Fixed false positives
 
     // ASCII art for warning message
     var asciiArt = 
@@ -12,6 +12,10 @@
 ██║░╚═╝░██║██║░░██║██║░╚███║░░░██║░░░╚██████╔╝
 ╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝░░░╚═╝░░░░╚═════╝░`;
 
+    // Track if devtools was opened by user action
+    var devToolsOpened = false;
+    var securityTriggered = false;
+
     // Load disable-devtool with all protections enabled - FIXED
     var disableDevtoolScript = document.createElement('script');
     disableDevtoolScript.src = 'https://cdn.jsdelivr.net/npm/disable-devtool@latest/dist/index.min.js';
@@ -19,12 +23,14 @@
         // Initialize disable-devtool after script is loaded
         if (typeof DisableDevtool !== 'undefined') {
             DisableDevtool({
-                md5: Date.now().toString(), // Randomize to prevent caching issues
+                md5: Date.now().toString(),
                 url: 'https://www.instagram.com/lambda.net.id/',
                 tkName: 'disable-devtool',
                 ondevtoolopen: function(type) {
-                    disableInteraction();
-                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
+                    if (!securityTriggered) {
+                        securityTriggered = true;
+                        showSecurityWarning();
+                    }
                 },
                 interval: 1000,
                 disableMenu: true
@@ -33,46 +39,8 @@
     };
     document.head.appendChild(disableDevtoolScript);
 
-    // Disable console completely - Enhanced
-    var originalConsole = window.console;
-    Object.defineProperty(window, 'console', {
-        get: function() {
-            return {
-                log: function() { 
-                    disableInteraction();
-                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
-                },
-                warn: function() {
-                    disableInteraction();
-                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
-                },
-                error: function() {
-                    disableInteraction();
-                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
-                },
-                info: function() {
-                    disableInteraction();
-                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
-                },
-                debug: function() {
-                    disableInteraction();
-                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
-                },
-                table: function() {
-                    disableInteraction();
-                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
-                },
-                clear: function() {
-                    disableInteraction();
-                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
-                }
-            };
-        },
-        set: function() {} // Prevent overriding
-    });
-
-    // Create security overlay
-    function disableInteraction() {
+    // Create security warning (without immediate redirect)
+    function showSecurityWarning() {
         // Remove any existing overlay first
         var existingOverlay = document.getElementById('security-overlay');
         if (existingOverlay) {
@@ -101,20 +69,25 @@
             '<h2 style="color: white; margin-top: 20px;">SECURITY WARNING</h2>' +
             '<p style="color: white;">Developer tools access is prohibited</p>' +
             '<p style="color: white;">Your IP and activity have been logged</p>' +
-            '<p style="color: white; font-size: 16px;">Redirecting to https://www.instagram.com/lambda.net.id/</p>';
+            '<p style="color: white; font-size: 16px;">This page will redirect shortly</p>' +
+            '<button id="close-warning" style="margin-top: 20px; padding: 10px 20px; background: red; color: white; border: none; cursor: pointer;">Close Warning</button>';
         document.body.appendChild(overlay);
         
-        // Disable all interactions
-        document.body.style.pointerEvents = 'none';
-        document.body.style.userSelect = 'none';
+        // Add event listener to close button
+        document.getElementById('close-warning').addEventListener('click', function() {
+            overlay.remove();
+            document.body.style.pointerEvents = 'auto';
+        });
         
-        // Redirect after a short delay
+        // Redirect after a delay, but only if this was a real security event
         setTimeout(function() {
-            window.location.href = 'https://www.instagram.com/lambda.net.id/';
-        }, 2000);
+            if (securityTriggered && overlay.parentNode) {
+                window.location.href = 'https://www.instagram.com/lambda.net.id/';
+            }
+        }, 5000);
     }
 
-    // Anti-HTTCrack and web scraper protection - Enhanced
+    // Anti-HTTCrack and web scraper protection - Less aggressive
     function preventPageCopying() {
         // Block common scraper user agents - Expanded list
         var blockedAgents = [
@@ -123,33 +96,30 @@
             'wget', 'curl', 'python-requests', 'java', 'scrapy', 'axios'
         ];
         
-        var userAgent = navigator.userAgent.toLowerCase();
-        if (blockedAgents.some(agent => userAgent.includes(agent.toLowerCase()))) {
-            window.location.href = 'https://www.instagram.com/lambda.net.id/';
+        var userAgent = navigator.userAgent;
+        if (blockedAgents.some(agent => userAgent.includes(agent))) {
+            // Only redirect for known scraping tools
+            securityTriggered = true;
+            showSecurityWarning();
             return;
         }
 
         // Detect if page is being framed (common in scrapers)
         if (window.top !== window.self) {
             try {
-                window.top.location.href = window.self.location.href;
+                // Only break out of frame if it's not a same-origin frame
+                if (window.top.location.hostname !== window.self.location.hostname) {
+                    window.top.location.href = window.self.location.href;
+                }
             } catch (e) {
-                // If we can't break out of the frame, replace content with warning
-                document.body.innerHTML = '<h1>Framing detected and blocked</h1>';
-                document.body.style.pointerEvents = 'none';
+                // If we can't break out of the frame, it's likely a security issue
+                securityTriggered = true;
+                showSecurityWarning();
             }
         }
-
-        // Add protection against "Save Page As" functionality - Enhanced
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) {
-                e.preventDefault();
-                disableInteraction();
-            }
-        }, false);
     }
 
-    // Enhanced keyboard shortcuts blocking
+    // Enhanced keyboard shortcuts blocking - Only trigger on specific shortcuts
     function blockShortcuts() {
         window.addEventListener('keydown', function(event) {
             // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
@@ -159,71 +129,43 @@
                 (event.ctrlKey && event.shiftKey && event.keyCode === 67) || // Ctrl+Shift+C
                 (event.ctrlKey && event.keyCode === 85)) { // Ctrl+U
                 event.preventDefault();
-                disableInteraction();
-            }
-            
-            // Block right-click context menu
-            if (event.keyCode === 93) { // Context Menu key
-                event.preventDefault();
-                disableInteraction();
+                if (!securityTriggered) {
+                    securityTriggered = true;
+                    showSecurityWarning();
+                }
             }
         });
     }
 
-    // Block right-click menu
+    // Block right-click menu - Show warning instead of immediate redirect
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
-        disableInteraction();
+        if (!securityTriggered) {
+            securityTriggered = true;
+            showSecurityWarning();
+        }
     });
 
-    // Block view-source: protocol - Enhanced
-    function blockViewSource() {
-        try {
-            // This will throw an error if someone tries view-source:
-            window.location.href = "view-source:" + window.location.href;
-        } catch (e) {
-            // Redirect if view-source is attempted
-            if (e.message && e.message.includes('view-source')) {
-                window.location.href = 'https://www.instagram.com/lambda.net.id/';
-            }
-        }
-    }
-
-    // Detect DevTools opening (alternative method) - Enhanced
-    var devToolsOpened = false;
+    // Detect DevTools opening (alternative method) - Less sensitive
     function checkDevTools() {
         var widthThreshold = window.outerWidth - window.innerWidth > 160;
         var heightThreshold = window.outerHeight - window.innerHeight > 160;
         
         if ((widthThreshold || heightThreshold) && !devToolsOpened) {
             devToolsOpened = true;
-            disableInteraction();
+            if (!securityTriggered) {
+                securityTriggered = true;
+                showSecurityWarning();
+            }
         }
     }
     
-    // Continuous monitoring for DevTools
-    setInterval(checkDevTools, 1000);
+    // Continuous monitoring for DevTools - Less frequent checking
+    setInterval(checkDevTools, 2000);
 
-    // Page integrity check - Enhanced
-    function checkPageIntegrity() {
-        var currentPath = window.location.pathname;
-        fetch(currentPath, {
-            method: 'HEAD',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-Protection-Check': 'true'
-            },
-            cache: 'no-store'
-        })
-        .then(function(response) {
-            if (!response.ok) {
-                window.location.href = 'https://www.instagram.com/lambda.net.id/';
-            }
-        })
-        .catch(function() {
-            window.location.href = 'https://www.instagram.com/lambda.net.id/';
-        });
-    }
+    // Initialize all protections
+    blockShortcuts();
+    preventPageCopying();
 
     // Add meta tag to prevent caching (makes scraping harder)
     var meta = document.createElement('meta');
@@ -237,26 +179,8 @@
     frameMeta.content = 'DENY';
     document.head.appendChild(frameMeta);
     
-    // Add CSP header dynamically
-    var cspMeta = document.createElement('meta');
-    cspMeta.httpEquiv = 'Content-Security-Policy';
-    cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';";
-    document.head.appendChild(cspMeta);
-
-    // Initialize all protections
-    blockShortcuts();
-    preventPageCopying();
-    blockViewSource();
-    checkPageIntegrity();
-    
     // Additional protection: Disable text selection
     document.addEventListener('selectstart', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    // Additional protection: Disable drag and drop
-    document.addEventListener('dragstart', function(e) {
         e.preventDefault();
         return false;
     });
