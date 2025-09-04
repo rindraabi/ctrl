@@ -1,7 +1,7 @@
 (function() {
     // Enhanced security script by Manyu Store
     // Protections against: DevTools, View-Source, F12, HTTrack, web scrapers
-    // Last updated: 09/04/2025
+    // Last updated: 09/04/2025 - Enhanced version
 
     // ASCII art for warning message
     var asciiArt = 
@@ -12,58 +12,63 @@
 ██║░╚═╝░██║██║░░██║██║░╚███║░░░██║░░░╚██████╔╝
 ╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝░░░╚═╝░░░░╚═════╝░`;
 
-    // Enhanced disable-devtool initialization
+    // Load disable-devtool with all protections enabled - FIXED
     var disableDevtoolScript = document.createElement('script');
-    disableDevtoolScript.src = 'https://cdn.jsdelivr.net/npm/disable-devtool@latest';
+    disableDevtoolScript.src = 'https://cdn.jsdelivr.net/npm/disable-devtool@latest/dist/index.min.js';
     disableDevtoolScript.onload = function() {
-        // Initialize disable-devtool with all options
+        // Initialize disable-devtool after script is loaded
         if (typeof DisableDevtool !== 'undefined') {
             DisableDevtool({
-                md5: 'your-custom-md5-hash-here', // Optional: Add your custom MD5
+                md5: Date.now().toString(), // Randomize to prevent caching issues
                 url: 'https://www.instagram.com/lambda.net.id/',
                 tkName: 'disable-devtool',
-                ondevtoolopen: function() {
+                ondevtoolopen: function(type) {
                     disableInteraction();
                     window.location.href = 'https://www.instagram.com/lambda.net.id/';
                 },
                 interval: 1000,
-                disableMenu: true,
-                stopIntervalTime: 5000,
-                clearLog: true,
-                disableSelect: true,
-                disableCopy: true,
-                disableCut: true,
-                disablePaste: true
+                disableMenu: true
             });
         }
     };
     document.head.appendChild(disableDevtoolScript);
 
-    // Enhanced console disabling with error handling
+    // Disable console completely - Enhanced
     var originalConsole = window.console;
     Object.defineProperty(window, 'console', {
         get: function() {
             return {
-                log: function() {},
-                warn: function() {},
-                error: function() {},
-                info: function() {},
-                debug: function() {},
-                table: function() {},
-                clear: function() {},
-                trace: function() {},
-                dir: function() {},
-                group: function() {},
-                groupEnd: function() {},
-                assert: function() {},
-                count: function() {},
-                time: function() {},
-                timeEnd: function() {}
+                log: function() { 
+                    disableInteraction();
+                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
+                },
+                warn: function() {
+                    disableInteraction();
+                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
+                },
+                error: function() {
+                    disableInteraction();
+                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
+                },
+                info: function() {
+                    disableInteraction();
+                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
+                },
+                debug: function() {
+                    disableInteraction();
+                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
+                },
+                table: function() {
+                    disableInteraction();
+                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
+                },
+                clear: function() {
+                    disableInteraction();
+                    window.location.href = 'https://www.instagram.com/lambda.net.id/';
+                }
             };
         },
-        set: function(value) {
-            // Prevent overriding our console object
-        }
+        set: function() {} // Prevent overriding
     });
 
     // Create security overlay
@@ -89,31 +94,33 @@
         overlay.style.flexDirection = "column";
         overlay.style.justifyContent = "center";
         overlay.style.alignItems = "center";
-        overlay.style.zIndex = "999999";
+        overlay.style.zIndex = "9999";
         overlay.style.pointerEvents = "auto";
         overlay.style.textAlign = "center";
         overlay.innerHTML = asciiArt + 
-            '<h2 style="color: white;">SECURITY WARNING</h2>' +
+            '<h2 style="color: white; margin-top: 20px;">SECURITY WARNING</h2>' +
             '<p style="color: white;">Developer tools access is prohibited</p>' +
             '<p style="color: white;">Your IP and activity have been logged</p>' +
-            '<p style="color: white;">Redirecting in 3 seconds...</p>';
+            '<p style="color: white; font-size: 16px;">Redirecting to https://www.instagram.com/lambda.net.id/</p>';
         document.body.appendChild(overlay);
+        
+        // Disable all interactions
+        document.body.style.pointerEvents = 'none';
+        document.body.style.userSelect = 'none';
         
         // Redirect after a short delay
         setTimeout(function() {
             window.location.href = 'https://www.instagram.com/lambda.net.id/';
-        }, 3000);
+        }, 2000);
     }
 
-    // Enhanced anti-HTTCrack and web scraper protection
+    // Anti-HTTCrack and web scraper protection - Enhanced
     function preventPageCopying() {
-        // Block common scraper user agents with more comprehensive list
+        // Block common scraper user agents - Expanded list
         var blockedAgents = [
-            'HTTrack', 'WebCopier', 'WebZIP', 'SiteSnagger', 
-            'Teleport', 'WebWhacker', 'Offline Explorer', 'WebSucker',
-            'wget', 'curl', 'python-requests', 'python-urllib', 'java',
-            'scrapy', 'mechanize', 'php', 'go-http-client', 'node-fetch',
-            'axios', 'request', 'libwww-perl', 'ruby', 'okhttp'
+            'HTTrack', 'WebCopier', 'WebZIP', 'SiteSnagger', 'Teleport', 
+            'WebWhacker', 'Offline Explorer', 'WebSucker', 'saveweb2zip',
+            'wget', 'curl', 'python-requests', 'java', 'scrapy', 'axios'
         ];
         
         var userAgent = navigator.userAgent.toLowerCase();
@@ -127,12 +134,13 @@
             try {
                 window.top.location.href = window.self.location.href;
             } catch (e) {
-                // If we can't break out of the frame, replace content
-                document.body.innerHTML = '<h1>Access Denied</h1><p>Framing of this page is not allowed.</p>';
+                // If we can't break out of the frame, replace content with warning
+                document.body.innerHTML = '<h1>Framing detected and blocked</h1>';
+                document.body.style.pointerEvents = 'none';
             }
         }
 
-        // Add protection against "Save Page As" functionality
+        // Add protection against "Save Page As" functionality - Enhanced
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) {
                 e.preventDefault();
@@ -154,132 +162,102 @@
                 disableInteraction();
             }
             
-            // Block right-click context menu key
-            if (event.keyCode === 93) {
+            // Block right-click context menu
+            if (event.keyCode === 93) { // Context Menu key
                 event.preventDefault();
                 disableInteraction();
             }
         });
     }
 
-    // Enhanced right-click blocking
+    // Block right-click menu
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
         disableInteraction();
-    }, false);
+    });
 
-    // Block view-source: protocol and other browser-specific tricks
+    // Block view-source: protocol - Enhanced
     function blockViewSource() {
-        // Block attempts to view source via URL
-        if (window.location.protocol === 'view-source:') {
-            window.location.href = 'https://www.instagram.com/lambda.net.id/';
-            return;
-        }
-        
-        // Block attempts to use data: URLs for iframe injection
-        if (window.location.protocol === 'data:') {
-            window.location.href = 'https://www.instagram.com/lambda.net.id/';
-            return;
+        try {
+            // This will throw an error if someone tries view-source:
+            window.location.href = "view-source:" + window.location.href;
+        } catch (e) {
+            // Redirect if view-source is attempted
+            if (e.message && e.message.includes('view-source')) {
+                window.location.href = 'https://www.instagram.com/lambda.net.id/';
+            }
         }
     }
 
-    // Detect DevTools opening (alternative method)
-    var devtoolsOpen = false;
-    var threshold = 160;
-    
+    // Detect DevTools opening (alternative method) - Enhanced
+    var devToolsOpened = false;
     function checkDevTools() {
-        var widthThreshold = window.outerWidth - window.innerWidth > threshold;
-        var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        var widthThreshold = window.outerWidth - window.innerWidth > 160;
+        var heightThreshold = window.outerHeight - window.innerHeight > 160;
         
-        if (!(widthThreshold || heightThreshold)) {
-            // Check for performance issues that might indicate devtools
-            var start = performance.now();
-            debugger;
-            var end = performance.now();
-            
-            if (end - start > 100) {
-                devtoolsOpen = true;
-            }
-        } else {
-            devtoolsOpen = true;
-        }
-        
-        if (devtoolsOpen) {
+        if ((widthThreshold || heightThreshold) && !devToolsOpened) {
+            devToolsOpened = true;
             disableInteraction();
         }
     }
     
+    // Continuous monitoring for DevTools
     setInterval(checkDevTools, 1000);
 
-    // Enhanced page integrity check
+    // Page integrity check - Enhanced
     function checkPageIntegrity() {
-        // Check if important elements have been removed (indicates scraping)
-        var importantElements = ['body', 'html', 'head'];
-        for (var i = 0; i < importantElements.length; i++) {
-            if (!document[importantElements[i]]) {
-                window.location.href = 'https://www.instagram.com/lambda.net.id/';
-                return;
-            }
-        }
-        
-        // Check if DOM has been excessively modified
-        var originalBodyContent = document.body.innerHTML;
-        setTimeout(function() {
-            if (document.body.innerHTML !== originalBodyContent) {
+        var currentPath = window.location.pathname;
+        fetch(currentPath, {
+            method: 'HEAD',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-Protection-Check': 'true'
+            },
+            cache: 'no-store'
+        })
+        .then(function(response) {
+            if (!response.ok) {
                 window.location.href = 'https://www.instagram.com/lambda.net.id/';
             }
-        }, 1000);
-    }
-
-    // Anti-scraping technique: Add honey pots
-    function addHoneyPots() {
-        // Add invisible links that scrapers might follow
-        var honeyPot = document.createElement('div');
-        honeyPot.style.display = 'none';
-        honeyPot.innerHTML = '<a href="/wp-admin/private-scraper-page.php" style="display:none;">Private</a>';
-        document.body.appendChild(honeyPot);
-        
-        // Monitor for clicks on honeypot links
-        document.addEventListener('click', function(e) {
-            if (e.target.getAttribute('href') === '/wp-admin/private-scraper-page.php') {
-                disableInteraction();
-            }
+        })
+        .catch(function() {
+            window.location.href = 'https://www.instagram.com/lambda.net.id/';
         });
     }
 
+    // Add meta tag to prevent caching (makes scraping harder)
+    var meta = document.createElement('meta');
+    meta.httpEquiv = 'Cache-Control';
+    meta.content = 'no-store, no-cache, must-revalidate, max-age=0';
+    document.head.appendChild(meta);
+
+    // Add meta tag to prevent framing
+    var frameMeta = document.createElement('meta');
+    frameMeta.httpEquiv = 'X-Frame-Options';
+    frameMeta.content = 'DENY';
+    document.head.appendChild(frameMeta);
+    
+    // Add CSP header dynamically
+    var cspMeta = document.createElement('meta');
+    cspMeta.httpEquiv = 'Content-Security-Policy';
+    cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';";
+    document.head.appendChild(cspMeta);
+
     // Initialize all protections
-    window.onload = function() {
-        blockShortcuts();
-        preventPageCopying();
-        blockViewSource();
-        checkPageIntegrity();
-        addHoneyPots();
-        
-        // Add meta tag to prevent caching (makes scraping harder)
-        var meta = document.createElement('meta');
-        meta.httpEquiv = 'Cache-Control';
-        meta.content = 'no-store, no-cache, must-revalidate, max-age=0';
-        document.head.appendChild(meta);
-
-        // Add meta tag to prevent framing
-        var frameMeta = document.createElement('meta');
-        frameMeta.httpEquiv = 'X-Frame-Options';
-        frameMeta.content = 'DENY';
-        document.head.appendChild(frameMeta);
-        
-        // Add CSP header via meta tag
-        var cspMeta = document.createElement('meta');
-        cspMeta.httpEquiv = 'Content-Security-Policy';
-        cspMeta.content = "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';";
-        document.head.appendChild(cspMeta);
-    };
-
-    // Continuous monitoring for DevTools
-    setInterval(function() {
-        if (window.outerWidth - window.innerWidth > 160 || 
-            window.outerHeight - window.innerHeight > 160) {
-            // Detected window resize that might indicate DevTools
-            disableInteraction();
-        }
-    }, 1000);
+    blockShortcuts();
+    preventPageCopying();
+    blockViewSource();
+    checkPageIntegrity();
+    
+    // Additional protection: Disable text selection
+    document.addEventListener('selectstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Additional protection: Disable drag and drop
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
 })();
