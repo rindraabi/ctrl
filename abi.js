@@ -67,13 +67,20 @@
     // Fungsi neraka: infinite debugger loop
     function startHellDebugger() {
         try {
-            // Loop tanpa henti, setiap iterasi memanggil debugger
-            while (true) {
-                debugger;
-            }
+            // 🔥 Delay dulu supaya DevTools sempat kebuka,
+            // jadi "Paused in debugger" muncul.
+            setTimeout(function hell() {
+                try {
+                    while (true) {
+                        debugger;
+                    }
+                } catch (e) {
+                    // Kalau somehow error, mulai lagi
+                    hell();
+                }
+            }, 1500); // 1.5 detik setelah lockDevTools dipanggil
         } catch (e) {
-            // Jika somehow error, mulai lagi
-            startHellDebugger();
+            try { location.reload(); } catch (_e) {}
         }
     }
 
@@ -132,7 +139,7 @@
             try { location.reload(); } catch (_e) {}
         }
 
-        // Setelah halaman terkunci, jalankan debugger while(true)
+        // Setelah halaman terkunci, jalankan debugger while(true) dengan delay
         startHellDebugger();
     }
 
