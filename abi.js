@@ -109,11 +109,6 @@
             overlay.style.userSelect = 'none';
             overlay.style.cursor = 'not-allowed';
 
-            overlay.textContent =
-                COPYRIGHT_TEXT +
-                ' - Developer tools detected. ' +
-                'Elements, Console, Network, Sources, Performance, Memory, Security are blocked.';
-
             body.appendChild(overlay);
 
             // Cegah semua interaksi selanjutnya
