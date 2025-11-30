@@ -22,6 +22,7 @@
     var COPYRIGHT_TEXT = 'Copyright Abi 2025 - v.1.0';
     var DEVTOOLS_LOCKED = false;
     var SIZE_THRESHOLD = 160;   // untuk deteksi panel DevTools
+    var DEBUGGER_DELAY_THRESHOLD = 100; // ms
 
     // 1. Tampilkan tulisan di console sekali (sebelum kita bisukan console)
     try {
@@ -48,7 +49,8 @@
         ].forEach(function (fn) {
             if (typeof console[fn] === 'function') {
                 console[fn] = function () {
-                    return undefined; // dibisukan
+                    // dibisukan total
+                    return undefined;
                 };
             }
         });
@@ -64,33 +66,13 @@
         } catch (e) {}
     }
 
-    // Fungsi neraka: infinite debugger loop
-    function startHellDebugger() {
-        try {
-            // 🔥 Delay dulu supaya DevTools sempat kebuka,
-            // jadi "Paused in debugger" muncul.
-            setTimeout(function hell() {
-                try {
-                    while (true) {
-                        debugger;
-                    }
-                } catch (e) {
-                    // Kalau somehow error, mulai lagi
-                    hell();
-                }
-            }, 1500); // 1.5 detik setelah lockDevTools dipanggil
-        } catch (e) {
-            try { location.reload(); } catch (_e) {}
-        }
-    }
-
     // Fungsi untuk mengunci halaman ketika DevTools terdeteksi
     function lockDevTools() {
         if (DEVTOOLS_LOCKED) return;
         DEVTOOLS_LOCKED = true;
 
         try {
-            // Hapus handler keyboard bawaan
+            // Hapus semua event listener penting
             window.onkeydown = null;
             window.onkeypress = null;
             window.onkeyup = null;
@@ -98,7 +80,7 @@
             document.onkeypress = null;
             document.onkeyup = null;
 
-            // Bersihkan body dan pasang overlay hitam tanpa teks
+            // Bersihkan body dan pasang overlay
             var body = document.body;
             if (!body) {
                 body = document.createElement('body');
@@ -127,20 +109,23 @@
             overlay.style.userSelect = 'none';
             overlay.style.cursor = 'not-allowed';
 
-            // Tidak ada teks di overlay
+            overlay.textContent =
+                COPYRIGHT_TEXT +
+                ' - Developer tools detected. ' +
+                'Elements, Console, Network, Sources, Performance, Memory, Security are blocked.';
+
             body.appendChild(overlay);
 
-            // Cegah semua interaksi selanjutnya di halaman
+            // Cegah semua interaksi selanjutnya
             window.addEventListener('click', function (e) { e.stopPropagation(); e.preventDefault(); }, true);
             window.addEventListener('keydown', function (e) { e.stopPropagation(); e.preventDefault(); }, true);
             window.addEventListener('contextmenu', function (e) { e.stopPropagation(); e.preventDefault(); }, true);
         } catch (e) {
             // fallback: kalau gagal, paksa reload
-            try { location.reload(); } catch (_e) {}
+            try {
+                location.reload();
+            } catch (_e) {}
         }
-
-        // Setelah halaman terkunci, jalankan debugger while(true) dengan delay
-        startHellDebugger();
     }
 
     // 3. Blokir key kombinasi: F12, Ctrl+Shift+I/J/C, Ctrl+U
@@ -194,7 +179,7 @@
         e.preventDefault();
     }, true);
 
-    // 5. Deteksi DevTools via ukuran (Elements/Console/Network/Sources/Performance/Memory/Security)
+    // 5a. Deteksi DevTools via ukuran (Elements/Network/Sources/Performance/Memory/Security)
     function checkSizeDevTools() {
         if (DEVTOOLS_LOCKED) return;
 
@@ -207,6 +192,31 @@
     }
 
     setInterval(checkSizeDevTools, 800);
-    window.addEventListener('resize', checkSizeDevTools);
+
+    window.addEventListener('resize', function () {
+        checkSizeDevTools();
+    });
+
+    // 5b. Deteksi DevTools via delay debugger (ekstrim)
+    (function debugLoop() {
+        if (DEVTOOLS_LOCKED) return;
+
+        setTimeout(function () {
+            if (DEVTOOLS_LOCKED) return;
+            var start = Date.now();
+
+            // debugger hanya akan "berhenti" ketika DevTools aktif
+            debugger;
+
+            var diff = Date.now() - start;
+            if (diff > DEBUGGER_DELAY_THRESHOLD) {
+                // Kalau delay terlalu besar, kemungkinan besar DevTools aktif
+                lockDevTools();
+                return;
+            }
+
+            debugLoop();
+        }, 1500);
+    })();
 
 })();
